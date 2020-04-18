@@ -8,18 +8,14 @@
 
 import SwiftUI
 
-//enum CalculatorButton: Int {
-//    case zero = 0
-//    case one
-//    case two
-//    case three
-//    case four
-//    case five
-//    case six
-//    case seven
-//    case eight
-//    case nine
-//}
+class GlobalEnvironment: ObservableObject {
+
+    @Published var displayedText = ""
+
+    func handleButton(_ button: CalculatorButton) {
+        displayedText = button.title
+    }
+}
 
 struct CalculatorButton: Hashable {
     var title: String = ""
@@ -39,6 +35,8 @@ struct CalculatorButton: Hashable {
 
 struct ContentView: View {
 
+    @EnvironmentObject var env: GlobalEnvironment
+
     let numbers: [[CalculatorButton]] = [
         [CalculatorButton("AC"), CalculatorButton("±"), CalculatorButton("%"), CalculatorButton("÷")],
         [CalculatorButton("9"), CalculatorButton("8"), CalculatorButton("7"), CalculatorButton("X")],
@@ -52,26 +50,36 @@ struct ContentView: View {
             VStack (spacing: 15) {
                 HStack {
                     Spacer()
-                    Text("5")
+                    Text(env.displayedText)
                         .font(.system(size: 40))
                 }.padding()
                 ForEach(numbers, id: \.self) { row in
                     HStack (spacing: 15) {
-                        ForEach(row, id: \.self) { number in
-                            Button(action: {
-
-                            }) {
-                                Text(number.title)
-                                .font(.system(size: 40))
-                                .frame(width: self.buttonWidth(number.title), height: self.buttonHeight())
-                                .background(number.bgColor)
-                                .foregroundColor(Color.white)
-                                .cornerRadius(self.buttonHeight())
-                            }
+                        ForEach(row, id: \.self) { button in
+                            CalculatorButtonView(button: button)
                         }
                     }
                 }
             }.padding(.bottom)
+        }
+    }
+}
+
+struct CalculatorButtonView: View {
+    var button: CalculatorButton
+
+    @EnvironmentObject var env: GlobalEnvironment
+
+    var body: some View{
+        Button(action: {
+            self.env.handleButton(self.button)
+        }) {
+            Text(button.title)
+                .font(.system(size: 40))
+                .frame(width: self.buttonWidth(button.title), height: self.buttonHeight())
+                .background(button.bgColor)
+                .foregroundColor(Color.white)
+                .cornerRadius(self.buttonHeight())
         }
     }
 
@@ -89,6 +97,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView().environmentObject(GlobalEnvironment())
     }
 }
