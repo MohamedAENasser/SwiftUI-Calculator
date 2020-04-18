@@ -12,8 +12,37 @@ class GlobalEnvironment: ObservableObject {
 
     @Published var displayedText = ""
 
+    var firstNumber = ""
+    var secondNumber = ""
+    var equationOperation = ""
+
     func handleButton(_ button: CalculatorButton) {
-        displayedText = button.title
+        if button.title == "=" {
+            let firstInt = Int(firstNumber) ?? 0
+            let secondInt = Int(secondNumber) ?? 0
+            switch equationOperation {
+            case "+":
+                displayedText = "\(firstInt + secondInt)"
+            case "-":
+                displayedText = "\(firstInt - secondInt)"
+            case "÷":
+                displayedText = "\(firstInt / secondInt)"
+            default:
+                displayedText = "\(firstInt * secondInt)"
+            }
+
+            firstNumber = ""
+            secondNumber = ""
+            equationOperation = ""
+        } else if "+-÷X".contains(button.title) {
+            equationOperation = button.title
+        } else if equationOperation.isEmpty {
+            firstNumber += button.title
+            displayedText = firstNumber
+        }  else {
+            secondNumber += button.title
+            displayedText = secondNumber
+        }
     }
 }
 
@@ -25,7 +54,7 @@ struct CalculatorButton: Hashable {
         self.title = title
         if Int(title) != nil || title == "." {
             bgColor = Color(.darkGray)
-        } else if "=+-/÷X".contains(title) {
+        } else if "=+-÷X".contains(title) {
             bgColor = Color(.orange)
         } else if "AC±%".contains(title) {
             bgColor = Color(.lightGray)
@@ -83,14 +112,14 @@ struct CalculatorButtonView: View {
         }
     }
 
-    func buttonWidth(_ title: String) -> CGFloat {
+    private func buttonWidth(_ title: String) -> CGFloat {
         if title == "0" {
             return ((UIScreen.main.bounds.width - 15*5)/4) * 2
         }
         return (UIScreen.main.bounds.width - 15*5)/4
     }
 
-    func buttonHeight() -> CGFloat {
+    private func buttonHeight() -> CGFloat {
         (UIScreen.main.bounds.width - 15*5)/4
     }
 }
